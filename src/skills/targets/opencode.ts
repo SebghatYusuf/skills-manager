@@ -18,6 +18,11 @@ async function ensureDir(targetPath: string): Promise<void> {
 
 async function moveSkill(fromPath: string, toPath: string): Promise<void> {
   await ensureDir(path.dirname(toPath));
+  try {
+    await fs.rm(toPath, { recursive: true, force: true });
+  } catch {
+    // ignore cleanup failure
+  }
   await fs.rename(fromPath, toPath);
 }
 

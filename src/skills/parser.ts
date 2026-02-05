@@ -47,11 +47,33 @@ export async function parseSkillFile(skillPath: string): Promise<ParsedSkillFile
 
   const frontmatterRaw = lines.slice(1, endIndex).join("\n");
   const body = lines.slice(endIndex + 1).join("\n");
-  const frontmatter = YAML.parse(frontmatterRaw) ?? {};
+  let frontmatter: Record<string, unknown> = {};
+  try {
+    const doc = YAML.parseDocument(frontmatterRaw, { prettyErrors: false });
+    if (doc.errors.length > 0) {
+      throw new Error(doc.errors[0].message);
+    }
+    frontmatter = (doc.toJSON() as Record<string, unknown>) ?? {};
+  } catch {
+    // Fallback: attempt to parse simple key: value lines for name/description.
+    const simple: Record<string, string> = {};
+    for (const line of frontmatterRaw.split(/\r?\n/)) {
+      const match = line.match(/^\s*([A-Za-z0-9_-]+)\s*:\s*(.+)\s*$/);
+      if (!match) {
+        continue;
+      }
+      const key = match[1].toLowerCase();
+      let value = match[2].trim();
+      value = value.replace(/^['"]|['"]$/g, "");
+      simple[key] = value;
+    }
+    frontmatter = simple;
+  }
 
-  const name = typeof frontmatter.name === "string" && frontmatter.name.trim()
-    ? frontmatter.name.trim()
-    : path.basename(path.dirname(skillPath));
+  const name =
+    typeof frontmatter.name === "string" && frontmatter.name.trim()
+      ? frontmatter.name.trim()
+      : path.basename(path.dirname(skillPath));
   const description = typeof frontmatter.description === "string" ? frontmatter.description.trim() : "";
 
   return {

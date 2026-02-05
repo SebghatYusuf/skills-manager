@@ -19,6 +19,7 @@ export interface TargetState {
   targetLabel: string;
   status: EnablementStatus;
   managed: boolean;
+  path?: string;
 }
 
 export interface SkillEntry extends SkillRecord {
@@ -55,9 +56,42 @@ export interface InstallResult {
   message: string;
 }
 
+export interface DeleteResult {
+  status: "ok" | "error";
+  message: string;
+}
+
+export interface InstallProgress {
+  stage: "start" | "clone" | "scan" | "copy" | "cleanup" | "done" | "error" | "output";
+  message: string;
+}
+
+export interface PopularSkill {
+  name: string;
+  repo: string;
+  installs?: string;
+  source: "skills.sh" | "skillsmp";
+}
+
+export interface PopularSkillsResult {
+  skills: PopularSkill[];
+  warnings: Partial<Record<PopularSkill["source"], string>>;
+}
+
+export interface SkillsMpSearchResult {
+  skills: PopularSkill[];
+  warning?: string;
+}
+
+export interface DebugLogEntry {
+  message: string;
+  timestamp: string;
+}
+
 export interface AppSettings {
   skillsmpApiKey?: string;
   extraRoots: string[];
   opencodeConfigPath?: string;
   defaultInstallTarget?: string;
+  vscodeCopilotRoot?: string;
 }

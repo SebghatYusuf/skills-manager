@@ -2,6 +2,7 @@
   "name": "skills-manager-desktop",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "yarn@4.11.0",
   "description": "Manage agent skills across IDEs",
   "main": "out/main/index.js",
   "author": "",
@@ -25,6 +26,7 @@
     "@vitejs/plugin-react": "^4.3.2",
     "electron": "^31.0.2",
     "electron-vite": "^2.3.0",
-    "typescript": "^5.6.2"
+    "typescript": "^5.6.2",
+    "vite": "^5.4.2"
   }
 }

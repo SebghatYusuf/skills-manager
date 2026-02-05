@@ -17,6 +17,11 @@ async function ensureDir(targetPath: string): Promise<void> {
 
 async function moveSkill(fromPath: string, toPath: string): Promise<void> {
   await ensureDir(path.dirname(toPath));
+  try {
+    await fs.rm(toPath, { recursive: true, force: true });
+  } catch {
+    // ignore cleanup failure
+  }
   await fs.rename(fromPath, toPath);
 }
 
@@ -29,7 +34,19 @@ async function pathExists(candidate: string): Promise<boolean> {
   }
 }
 
-export function createVsCodeTarget(options: { managedRoot: string }): SkillTarget {
+async function readSymlinkTarget(linkPath: string): Promise<string | null> {
+  try {
+    const stat = await fs.lstat(linkPath);
+    if (!stat.isSymbolicLink()) {
+      return null;
+    }
+    return await fs.readlink(linkPath);
+  } catch {
+    return null;
+  }
+}
+
+export function createVsCodeTarget(options: { managedRoot: string; copilotRoot?: string }): SkillTarget {
   const roots = [options.managedRoot];
 
   return {
@@ -45,6 +62,11 @@ export function createVsCodeTarget(options: { managedRoot: string }): SkillTarge
       if (!root) {
         return "not-installed";
       }
+      if (options.copilotRoot) {
+        const linkPath = path.join(options.copilotRoot, path.basename(skill.path));
+        const target = await readSymlinkTarget(linkPath);
+        return target ? "enabled" : "disabled";
+      }
       const disabledRoot = getDisabledRoot(root);
       if (isUnderRoot(skill.path, disabledRoot)) {
         return "disabled";
@@ -56,9 +78,21 @@ export function createVsCodeTarget(options: { managedRoot: string }): SkillTarge
       if (!root) {
         throw new Error("Skill is not installed in the VS Code managed root.");
       }
-      const disabledRoot = getDisabledRoot(root);
       const skillName = path.basename(skill.path);
 
+      if (options.copilotRoot) {
+        const linkPath = path.join(options.copilotRoot, skillName);
+        if (enabled) {
+          await ensureDir(options.copilotRoot);
+          await fs.rm(linkPath, { recursive: true, force: true });
+          await fs.symlink(path.join(root, skillName), linkPath, "dir");
+        } else {
+          await fs.rm(linkPath, { recursive: true, force: true });
+        }
+        return;
+      }
+
+      const disabledRoot = getDisabledRoot(root);
       if (enabled) {
         const fromPath = path.join(disabledRoot, skillName);
         const toPath = path.join(root, skillName);

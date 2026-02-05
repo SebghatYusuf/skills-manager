@@ -30,11 +30,25 @@ async function collectSkillFilesFromRoot(root: string): Promise<string[]> {
   }
 
   const entries = await fs.readdir(root, { withFileTypes: true });
+  const scanDirs: string[] = [];
   for (const entry of entries) {
     if (!entry.isDirectory()) {
       continue;
     }
-    const skillFile = path.join(root, entry.name, "SKILL.md");
+    scanDirs.push(path.join(root, entry.name));
+    if (entry.name === ".disabled") {
+      const disabledEntries = await fs.readdir(path.join(root, entry.name), { withFileTypes: true });
+      for (const disabledEntry of disabledEntries) {
+        if (!disabledEntry.isDirectory()) {
+          continue;
+        }
+        scanDirs.push(path.join(root, entry.name, disabledEntry.name));
+      }
+    }
+  }
+
+  for (const dir of scanDirs) {
+    const skillFile = path.join(dir, "SKILL.md");
     if (await pathExists(skillFile)) {
       skillFiles.push(skillFile);
     }
@@ -46,6 +60,11 @@ async function collectSkillFilesFromRoot(root: string): Promise<string[]> {
 interface RegistryOptions {
   extraRoots: string[];
   targets: SkillTarget[];
+}
+
+interface SkillEntryCandidate {
+  record: SkillRecord;
+  entries: { path: string; root: string }[];
 }
 
 export class SkillRegistry {
@@ -80,36 +99,38 @@ export class SkillRegistry {
     }
     this.options.extraRoots.forEach((root) => rootSet.add(root));
 
-    const skillMap = new Map<string, SkillRecord>();
+    const skillMap = new Map<string, SkillEntryCandidate>();
     for (const root of rootSet) {
       const skillFiles = await collectSkillFilesFromRoot(root);
       for (const filePath of skillFiles) {
         const skillPath = path.dirname(filePath);
-        if (!skillMap.has(skillPath)) {
-          const record = await loadSkillRecord(filePath);
+        const record = await loadSkillRecord(filePath);
+        const key = record.name.toLowerCase();
+        const existing = skillMap.get(key);
+        if (!existing) {
           record.sourceRoots.push(root);
-          skillMap.set(skillPath, record);
+          skillMap.set(key, { record, entries: [{ path: skillPath, root }] });
         } else {
-          const record = skillMap.get(skillPath);
-          if (record) {
-            record.sourceRoots.push(root);
-          }
+          existing.record.sourceRoots.push(root);
+          existing.entries.push({ path: skillPath, root });
         }
       }
     }
 
     const entries: SkillEntry[] = [];
-    for (const record of skillMap.values()) {
+    for (const candidate of skillMap.values()) {
+      const record = candidate.record;
       const targets: TargetState[] = [];
       for (const target of this.targets) {
         const roots = this.targetRoots.get(target.id) ?? [];
-        const isInstalled = roots.some((root) => isPathUnderRoot(record.path, root) || record.path === root);
+        const match = candidate.entries.find((entry) => roots.some((root) => isPathUnderRoot(entry.path, root) || entry.path === root));
+        const isInstalled = Boolean(match);
         if (!isInstalled) {
           targets.push({
             targetId: target.id,
             targetLabel: target.label,
             status: "not-installed",
-            managed: roots.some((root) => target.isManagedRoot(root)),
+            managed: roots.some((root) => target.isManagedRoot(root))
           });
           continue;
         }
@@ -119,15 +140,17 @@ export class SkillRegistry {
             targetLabel: target.label,
             status: "unsupported",
             managed: roots.some((root) => target.isManagedRoot(root)),
+            path: match?.path
           });
           continue;
         }
-        const status = await target.getEnablement(record);
+        const status = await target.getEnablement({ ...record, path: match?.path ?? record.path });
         targets.push({
           targetId: target.id,
           targetLabel: target.label,
           status,
           managed: roots.some((root) => target.isManagedRoot(root)),
+          path: match?.path
         });
       }
       entries.push({ ...record, targets });
@@ -150,6 +173,7 @@ export class SkillRegistry {
     }
 
     const nextEnabled = current.status !== "enabled";
-    await target.setEnablement(skill, nextEnabled);
+    const skillForTarget = current.path ? { ...skill, path: current.path } : skill;
+    await target.setEnablement(skillForTarget, nextEnabled);
   }
 }
