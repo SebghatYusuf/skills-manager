@@ -1,0 +1,19 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="core" x1="256" y1="128" x2="896" y2="960" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#22D3EE"/>
+      <stop offset="0.52" stop-color="#0EA5E9"/>
+      <stop offset="1" stop-color="#2563EB"/>
+    </linearGradient>
+    <radialGradient id="halo" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(512 512) rotate(90) scale(420)">
+      <stop offset="0" stop-color="#7DD3FC" stop-opacity="0.55"/>
+      <stop offset="0.6" stop-color="#38BDF8" stop-opacity="0.18"/>
+      <stop offset="1" stop-color="#0EA5E9" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1024" height="1024" rx="240" fill="#0B1220"/>
+  <rect x="104" y="104" width="816" height="816" rx="220" fill="url(#halo)"/>
+  <circle cx="512" cy="512" r="236" fill="url(#core)"/>
+  <circle cx="512" cy="512" r="116" fill="#0B1220"/>
+  <circle cx="512" cy="512" r="64" fill="#E2E8F0"/>
+</svg>

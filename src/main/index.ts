@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from "electron";
+import { app, BrowserWindow, Menu, nativeImage, shell } from "electron";
 import fs from "fs/promises";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -33,8 +33,88 @@ async function loadEnvFile(filePath: string): Promise<void> {
   }
 }
 
-async function createWindow(): Promise<void> {
+function buildAppMenu(mainWindow: BrowserWindow): void {
+  const template: Electron.MenuItemConstructorOptions[] = [
+    {
+      label: app.name,
+      submenu: [
+        { role: "about" },
+        { type: "separator" },
+        {
+          label: "Settings…",
+          accelerator: "CmdOrCtrl+,",
+          click: () => mainWindow.webContents.send("app:navigate", "settings")
+        },
+        { type: "separator" },
+        { role: "services" },
+        { type: "separator" },
+        { role: "hide" },
+        { role: "hideOthers" },
+        { role: "unhide" },
+        { type: "separator" },
+        { role: "quit" }
+      ]
+    },
+    {
+      label: "File",
+      submenu: [
+        {
+          label: "Discover Skills",
+          accelerator: "CmdOrCtrl+1",
+          click: () => mainWindow.webContents.send("app:navigate", "discover")
+        },
+        {
+          label: "Installed Skills",
+          accelerator: "CmdOrCtrl+2",
+          click: () => mainWindow.webContents.send("app:navigate", "catalog")
+        },
+        {
+          label: "Activity",
+          accelerator: "CmdOrCtrl+3",
+          click: () => mainWindow.webContents.send("app:navigate", "activity")
+        },
+        { type: "separator" },
+        { role: "close" }
+      ]
+    },
+    { role: "editMenu" },
+    {
+      role: "viewMenu",
+      submenu: [
+        { role: "reload" },
+        { role: "forceReload" },
+        { role: "toggleDevTools" },
+        { type: "separator" },
+        { role: "resetZoom" },
+        { role: "zoomIn" },
+        { role: "zoomOut" },
+        { type: "separator" },
+        { role: "togglefullscreen" }
+      ]
+    },
+    { role: "windowMenu" },
+    {
+      role: "help",
+      submenu: [
+        {
+          label: "SkillsMP API Docs",
+          click: () => shell.openExternal("https://skillsmp.com/docs/api")
+        }
+      ]
+    }
+  ];
+
+  const menu = Menu.buildFromTemplate(template);
+  Menu.setApplicationMenu(menu);
+}
+
+function resolveIconPath(): string {
+  return path.join(app.getAppPath(), "media/app-icon.svg");
+}
+
+async function createWindow(): Promise<BrowserWindow> {
   const preloadPath = path.join(__dirname, "../preload/index.js");
+  const iconPath = resolveIconPath();
 
   const mainWindow = new BrowserWindow({
     width: 1280,
@@ -42,6 +122,7 @@ async function createWindow(): Promise<void> {
     minWidth: 1024,
     minHeight: 680,
     backgroundColor: "#14131A",
+    icon: iconPath,
     webPreferences: {
       preload: preloadPath,
       contextIsolation: true,
@@ -55,6 +136,17 @@ async function createWindow(): Promise<void> {
   } else {
     await mainWindow.loadFile(path.join(__dirname, "../renderer/index.html"));
   }
+
+  buildAppMenu(mainWindow);
+
+  if (process.platform === "darwin") {
+    const dockIcon = nativeImage.createFromPath(iconPath);
+    if (!dockIcon.isEmpty()) {
+      app.dock.setIcon(dockIcon);
+    }
+  }
+
+  return mainWindow;
 }
 
 app.whenReady().then(() => {

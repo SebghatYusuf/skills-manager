@@ -41,7 +41,16 @@ const api = {
   },
   getSettings: (): Promise<AppSettings> => ipcRenderer.invoke("settings:get"),
   updateSettings: (partial: Partial<AppSettings>): Promise<AppSettings> =>
-    ipcRenderer.invoke("settings:update", partial)
+    ipcRenderer.invoke("settings:update", partial),
+  onAppNavigate: (handler: (tab: "discover" | "catalog" | "activity" | "settings") => void): (() => void) => {
+    const listener = (_event: Electron.IpcRendererEvent, tab: "discover" | "catalog" | "activity" | "settings") => {
+      handler(tab);
+    };
+    ipcRenderer.on("app:navigate", listener);
+    return () => {
+      ipcRenderer.removeListener("app:navigate", listener);
+    };
+  }
 };
 
 contextBridge.exposeInMainWorld("skillsApi", api);
