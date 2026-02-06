@@ -157,6 +157,83 @@ button {
   gap: 10px;
 }
 
+.theme-toggle {
+  border: none;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+}
+
+.theme-track {
+  position: relative;
+  width: 72px;
+  height: 32px;
+  border-radius: 999px;
+  background: linear-gradient(120deg, #f7d794, #fef3c7);
+  box-shadow: inset 0 0 0 1px rgba(27, 27, 31, 0.12), 0 10px 24px rgba(27, 27, 31, 0.18);
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 8px;
+  overflow: hidden;
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+
+[data-theme="dark"] .theme-track {
+  background: linear-gradient(120deg, #1f2a44, #0b1324);
+  box-shadow: inset 0 0 0 1px rgba(96, 165, 250, 0.35), 0 14px 34px rgba(0, 0, 0, 0.55);
+}
+
+.theme-icon {
+  width: 16px;
+  height: 16px;
+  color: #f59e0b;
+  display: grid;
+  place-items: center;
+  transition: transform 0.35s ease, opacity 0.35s ease, color 0.35s ease;
+}
+
+.theme-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.theme-icon.moon {
+  color: #94a3b8;
+  opacity: 0.6;
+  transform: translateX(2px);
+}
+
+[data-theme="dark"] .theme-icon.sun {
+  opacity: 0.35;
+  color: #fbbf24;
+  transform: translateX(-6px) rotate(-20deg);
+}
+
+[data-theme="dark"] .theme-icon.moon {
+  opacity: 1;
+  color: #e0f2fe;
+  transform: translateX(0);
+}
+
+.theme-thumb {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 8px 16px rgba(15, 23, 42, 0.25);
+  transition: transform 0.35s ease, background 0.35s ease, box-shadow 0.35s ease;
+}
+
+[data-theme="dark"] .theme-thumb {
+  transform: translateX(40px);
+  background: #111827;
+  box-shadow: 0 12px 22px rgba(0, 0, 0, 0.55);
+}
+
 .main {
   position: relative;
   z-index: 1;
@@ -594,6 +671,15 @@ button.primary:disabled {
   gap: 12px;
   align-items: center;
   margin-bottom: 16px;
+}
+
+.catalog-toolbar.ide-filters {
+  grid-template-columns: minmax(0, 220px) 1fr;
+  align-items: flex-end;
+}
+
+.inline-field {
+  margin-bottom: 0;
 }
 
 .filter-group {

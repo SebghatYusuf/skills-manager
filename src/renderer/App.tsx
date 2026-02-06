@@ -108,6 +108,8 @@ export default function App() {
   const [debugLog, setDebugLog] = useState<DebugLogEntry[]>([]);
   const [skillQuery, setSkillQuery] = useState<string>("");
   const [skillFilter, setSkillFilter] = useState<"all" | "enabled" | "disabled" | "not-installed">("all");
+  const [ideFilter, setIdeFilter] = useState<string>("all");
+  const [ideStatusFilter, setIdeStatusFilter] = useState<"any" | "enabled" | "disabled" | "not-installed">("any");
 
   useEffect(() => {
     const saved = window.localStorage.getItem("theme");
@@ -209,11 +211,25 @@ export default function App() {
         return false;
       }
       if (skillFilter === "all") {
-        return true;
+        // continue to IDE filter checks
+      } else {
+        const matchesAny = skill.targets.some((target) => target.status === skillFilter);
+        if (!matchesAny) {
+          return false;
+        }
       }
-      return skill.targets.some((target) => target.status === skillFilter);
+      if (ideFilter !== "all") {
+        const target = skill.targets.find((entry) => entry.targetId === ideFilter);
+        if (!target) {
+          return false;
+        }
+        if (ideStatusFilter !== "any") {
+          return target.status === ideStatusFilter;
+        }
+      }
+      return true;
     });
-  }, [skills, skillQuery, skillFilter]);
+  }, [skills, skillQuery, skillFilter, ideFilter, ideStatusFilter]);
 
   const isInstalledPopular = (skill: PopularSkill) => installedSkillNames.has(skill.name.toLowerCase());
   const resolveIdeMeta = (targetId: string) =>
@@ -376,8 +392,35 @@ export default function App() {
             ))}
           </nav>
           <div className="topbar-actions">
-            <button className="ghost" onClick={() => setTheme(theme === "dark" ? "light" : "dark")}>
-              {theme === "dark" ? "Light mode" : "Dark mode"}
+            <button
+              className="theme-toggle"
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              aria-label="Toggle dark mode"
+            >
+              <span className="theme-track">
+                <span className="theme-icon sun" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none">
+                    <circle cx="12" cy="12" r="5" stroke="currentColor" strokeWidth="1.6" />
+                    <path
+                      d="M12 2.6v2.2M12 19.2v2.2M4.8 4.8l1.6 1.6M17.6 17.6l1.6 1.6M2.6 12h2.2M19.2 12h2.2M4.8 19.2l1.6-1.6M17.6 6.4l1.6-1.6"
+                      stroke="currentColor"
+                      strokeWidth="1.6"
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                </span>
+                <span className="theme-icon moon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none">
+                    <path
+                      d="M20 14.5a7.8 7.8 0 0 1-9.5-9.5 8.2 8.2 0 1 0 9.5 9.5Z"
+                      stroke="currentColor"
+                      strokeWidth="1.6"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </span>
+                <span className="theme-thumb" />
+              </span>
             </button>
           </div>
         </div>
@@ -645,6 +688,35 @@ export default function App() {
                         onClick={() => setSkillFilter(filter)}
                       >
                         {filter === "not-installed" ? "Not installed" : filter[0].toUpperCase() + filter.slice(1)}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="catalog-toolbar ide-filters">
+                  <label className="field inline-field">
+                    <span>IDE</span>
+                    <select value={ideFilter} onChange={(event) => setIdeFilter(event.target.value)}>
+                      <option value="all">All IDEs</option>
+                      {targets.map((target) => (
+                        <option key={target.id} value={target.id}>
+                          {target.label}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <div className="filter-group">
+                    {(["any", "enabled", "disabled", "not-installed"] as const).map((filter) => (
+                      <button
+                        key={filter}
+                        className={ideStatusFilter === filter ? "filter-pill active" : "filter-pill"}
+                        onClick={() => setIdeStatusFilter(filter)}
+                        disabled={ideFilter === "all"}
+                      >
+                        {filter === "any"
+                          ? "Any status"
+                          : filter === "not-installed"
+                            ? "Not installed"
+                            : filter[0].toUpperCase() + filter.slice(1)}
                       </button>
                     ))}
                   </div>
