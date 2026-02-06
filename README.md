@@ -4,6 +4,10 @@ Install, enable, and manage agent skills across IDEs with one unified desktop ap
 
 ![Skills Manager hero](media/app-icon.svg)
 
+## Screenshots
+![Discover view](media/discover.png)
+![Install workflow](media/install-skills.png)
+
 ## Features
 - **Multi‑IDE control**: Install once, enable/disable per IDE.
 - **Skills discovery**: Top skills from skills.sh + SkillsMP search.

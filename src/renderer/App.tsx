@@ -438,8 +438,18 @@ export default function App() {
                 <div key={summary.target.id} className="metric-card">
                   <div className="metric-label">{summary.target.label}</div>
                   <div className="metric-value">{summary.enabledCount} enabled</div>
-                  <div className="metric-meta">~{summary.metadataTokens} metadata</div>
-                  <div className="metric-meta">~{summary.fullTokens} total</div>
+                  <div className="metric-meta">
+                    ~{summary.metadataTokens} meta tokens
+                    <span className="hint" data-tooltip="Metadata tokens are always included in the LLM context.">
+                      i
+                    </span>
+                  </div>
+                  <div className="metric-meta">
+                    ~{summary.fullTokens} total tokens
+                    <span className="hint" data-tooltip="Full tokens include the entire skill content added to the LLM context.">
+                      i
+                    </span>
+                  </div>
                 </div>
               ))}
             </div>
@@ -748,8 +758,18 @@ export default function App() {
                         <p className="row-path">{skill.path}</p>
                       </div>
                       <div className="row-actions">
-                        <span className="pill">Meta ~{skill.tokens.metadata}</span>
-                        <span className="pill">Total ~{skill.tokens.full}</span>
+                        <span
+                          className="pill"
+                          data-tooltip="Metadata tokens are always included in the LLM context."
+                        >
+                          Meta tokens ~{skill.tokens.metadata}
+                        </span>
+                        <span
+                          className="pill"
+                          data-tooltip="Full tokens include the entire skill content added to the LLM context."
+                        >
+                          Total tokens ~{skill.tokens.full}
+                        </span>
                       </div>
                     </button>
                   ))}
@@ -759,7 +779,7 @@ export default function App() {
           )}
 
           {activeTab === "activity" && (
-            <section className="layout-2col">
+            <section className="layout-1col">
               <div className="panel">
                 <div className="panel-header">
                   <div>
@@ -777,7 +797,7 @@ export default function App() {
                   ))}
                 </div>
               </div>
-              <div className="panel">
+              {/* <div className="panel">
                 <div className="panel-header">
                   <div>
                     <h2>Search Debug</h2>
@@ -795,7 +815,7 @@ export default function App() {
                     </div>
                   ))}
                 </div>
-              </div>
+              </div> */}
             </section>
           )}
 

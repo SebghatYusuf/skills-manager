@@ -308,6 +308,9 @@ button {
 .metric-meta {
   font-size: 0.8rem;
   color: var(--muted);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .status-banner {
@@ -496,6 +499,61 @@ button {
   color: var(--accent-strong);
   font-size: 0.72rem;
   font-weight: 600;
+  position: relative;
+}
+
+.hint {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: rgba(29, 78, 216, 0.16);
+  color: var(--accent-strong);
+  font-size: 0.65rem;
+  font-weight: 700;
+  cursor: help;
+}
+
+[data-tooltip] {
+  position: relative;
+}
+
+[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 8px);
+  transform: translateX(-50%);
+  min-width: 200px;
+  max-width: 240px;
+  background: var(--ink);
+  color: #ffffff;
+  font-size: 0.72rem;
+  padding: 8px 10px;
+  border-radius: 10px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  transform-origin: bottom;
+}
+
+[data-tooltip]::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 2px);
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: var(--ink);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+[data-tooltip]:hover::after,
+[data-tooltip]:hover::before {
+  opacity: 1;
 }
 
 .source-grid {
