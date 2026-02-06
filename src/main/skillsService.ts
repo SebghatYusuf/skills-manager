@@ -441,7 +441,7 @@ export class SkillsService {
           } catch {
             // ignore link cleanup failure
           }
-          await fs.symlink(sourcePath, linkPath, "dir");
+          await copyDir(sourcePath, linkPath);
         }
       }
       emit("done", `Installed ${toInstall.length} skill(s) into ${targetRoot}.`);

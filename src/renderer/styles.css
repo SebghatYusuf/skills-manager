@@ -1,20 +1,20 @@
-@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Manrope:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap");
 
 :root {
   color-scheme: light;
-  --bg: #f5f7fb;
-  --bg-alt: #eef2f8;
+  --bg: #f4f1ec;
+  --bg-alt: #efe7db;
   --surface: #ffffff;
-  --surface-soft: #f8fafc;
-  --ink: #0f172a;
-  --muted: #64748b;
-  --accent: #0ea5e9;
-  --accent-strong: #0284c7;
-  --accent-soft: rgba(14, 165, 233, 0.12);
-  --border: rgba(15, 23, 42, 0.12);
-  --hairline: rgba(15, 23, 42, 0.08);
-  --shadow: 0 24px 48px rgba(15, 23, 42, 0.08);
-  --shadow-soft: 0 10px 24px rgba(15, 23, 42, 0.08);
+  --surface-soft: #faf7f1;
+  --ink: #1b1b1f;
+  --muted: #6b6b73;
+  --accent: #1d4ed8;
+  --accent-strong: #1e40af;
+  --accent-soft: rgba(29, 78, 216, 0.12);
+  --border: rgba(27, 27, 31, 0.12);
+  --hairline: rgba(27, 27, 31, 0.08);
+  --shadow: 0 28px 56px rgba(27, 27, 31, 0.12);
+  --shadow-soft: 0 12px 28px rgba(27, 27, 31, 0.1);
   --radius-lg: 20px;
   --radius-md: 14px;
   --radius-sm: 10px;
@@ -24,21 +24,21 @@
 
 [data-theme="dark"] {
   color-scheme: dark;
-  --bg: #0b0f17;
-  --bg-alt: #0f1623;
-  --surface: #111826;
-  --surface-soft: #161f31;
-  --ink: #e2e8f0;
-  --muted: #94a3b8;
-  --accent: #38bdf8;
-  --accent-strong: #0ea5e9;
-  --accent-soft: rgba(56, 189, 248, 0.18);
-  --border: rgba(148, 163, 184, 0.18);
-  --hairline: rgba(148, 163, 184, 0.12);
-  --shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
-  --shadow-soft: 0 14px 32px rgba(0, 0, 0, 0.45);
-  --console-bg: #0a0f1b;
-  --console-border: rgba(148, 163, 184, 0.2);
+  --bg: #0c0c10;
+  --bg-alt: #14141a;
+  --surface: #14141c;
+  --surface-soft: #1b1b24;
+  --ink: #f6f3ef;
+  --muted: #a29f9a;
+  --accent: #60a5fa;
+  --accent-strong: #3b82f6;
+  --accent-soft: rgba(96, 165, 250, 0.18);
+  --border: rgba(246, 243, 239, 0.12);
+  --hairline: rgba(246, 243, 239, 0.1);
+  --shadow: 0 28px 70px rgba(0, 0, 0, 0.5);
+  --shadow-soft: 0 16px 36px rgba(0, 0, 0, 0.4);
+  --console-bg: #0b0b12;
+  --console-border: rgba(246, 243, 239, 0.16);
 }
 
 * {
@@ -47,7 +47,7 @@
 
 body {
   margin: 0;
-  font-family: "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   background: var(--bg);
   color: var(--ink);
   line-height: 1.5;
@@ -70,8 +70,8 @@ button {
   position: fixed;
   inset: 0;
   background:
-    radial-gradient(900px circle at 10% -10%, rgba(14, 165, 233, 0.18), transparent 60%),
-    radial-gradient(900px circle at 90% 0%, rgba(14, 165, 233, 0.08), transparent 60%);
+    radial-gradient(900px circle at 10% -10%, rgba(29, 78, 216, 0.18), transparent 60%),
+    radial-gradient(900px circle at 90% 0%, rgba(29, 78, 216, 0.08), transparent 60%);
   pointer-events: none;
   z-index: 0;
 }
@@ -111,7 +111,7 @@ button {
 
 .brand-title {
   margin: 0;
-  font-family: "Space Grotesk", sans-serif;
+  font-family: "Fraunces", serif;
   font-weight: 600;
   font-size: 1rem;
 }
@@ -190,7 +190,7 @@ button {
 
 .hero h1 {
   margin: 0 0 10px;
-  font-family: "Space Grotesk", sans-serif;
+  font-family: "Fraunces", serif;
   font-size: clamp(2.2rem, 2.6vw + 1.2rem, 3.2rem);
   letter-spacing: -0.02em;
 }
@@ -278,7 +278,7 @@ button {
 
 .panel-header h2 {
   margin: 0 0 4px;
-  font-family: "Space Grotesk", sans-serif;
+  font-family: "Fraunces", serif;
   font-size: 1.2rem;
   color: var(--ink);
 }
@@ -348,6 +348,60 @@ button {
   font-size: 0.72rem;
   color: var(--muted);
   word-break: break-all;
+}
+
+.ide-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.ide-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px 6px 6px;
+  border-radius: 999px;
+  border: 1px solid var(--hairline);
+  background: var(--surface-soft);
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.ide-pill.enabled {
+  border-color: rgba(34, 197, 94, 0.4);
+  color: #15803d;
+  background: rgba(34, 197, 94, 0.12);
+}
+
+.ide-pill.disabled {
+  border-color: rgba(249, 115, 22, 0.4);
+  color: #b45309;
+  background: rgba(249, 115, 22, 0.12);
+}
+
+.ide-pill.not-installed,
+.ide-pill.unsupported {
+  opacity: 0.8;
+}
+
+.ide-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  background: transparent;
+  border: 1px solid transparent;
+}
+
+.ide-logo {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+  filter: none;
 }
 
 .row-actions {
@@ -626,7 +680,7 @@ button.primary:disabled {
   gap: 10px;
 }
 
-.toggle-row {
+.switch-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -635,20 +689,20 @@ button.primary:disabled {
   border-radius: var(--radius-md);
   border: 1px solid var(--hairline);
   background: var(--surface-soft);
-  cursor: pointer;
 }
 
-.toggle-row.enabled {
+.switch-row.enabled {
   border-color: rgba(14, 165, 233, 0.5);
 }
 
-.toggle-row.disabled {
+.switch-row.disabled {
   border-color: rgba(249, 115, 22, 0.4);
 }
 
-.toggle-row:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
+.switch-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .chip-title {
@@ -665,6 +719,54 @@ button.primary:disabled {
 .chip-action {
   font-weight: 600;
   color: var(--accent-strong);
+}
+
+.switch {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.switch input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  width: 42px;
+  height: 24px;
+  background: rgba(107, 114, 128, 0.3);
+  border-radius: 999px;
+  position: relative;
+  transition: background 0.2s ease;
+  border: 1px solid var(--hairline);
+}
+
+.slider::after {
+  content: "";
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  top: 2px;
+  left: 2px;
+  border-radius: 50%;
+  background: #ffffff;
+  transition: transform 0.2s ease;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+.switch input:checked + .slider {
+  background: var(--accent);
+}
+
+.switch input:checked + .slider::after {
+  transform: translateX(18px);
+}
+
+.switch input:disabled + .slider {
+  opacity: 0.5;
 }
 
 .muted {

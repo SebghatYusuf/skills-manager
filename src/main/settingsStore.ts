@@ -1,11 +1,54 @@
 import fs from "fs/promises";
 import path from "path";
+import os from "os";
 import { app } from "electron";
 import { AppSettings } from "../shared/types";
 
 const DEFAULT_SETTINGS: AppSettings = {
   extraRoots: []
 };
+
+function expandHomePath(input: string): string {
+  if (input === "~") {
+    return os.homedir();
+  }
+  if (input.startsWith(`~${path.sep}`) || input.startsWith("~/")) {
+    return path.join(os.homedir(), input.slice(2));
+  }
+  if (input === "$HOME" || input === "${HOME}") {
+    return os.homedir();
+  }
+  if (input.startsWith("$HOME/")) {
+    return path.join(os.homedir(), input.slice("$HOME/".length));
+  }
+  if (input.startsWith("${HOME}/")) {
+    return path.join(os.homedir(), input.slice("${HOME}/".length));
+  }
+  return input;
+}
+
+function normalizeOptionalPath(value?: string): string | undefined {
+  if (value == null) {
+    return undefined;
+  }
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return undefined;
+  }
+  return expandHomePath(trimmed);
+}
+
+function normalizeCopilotRoot(value?: string): string | undefined {
+  const expanded = normalizeOptionalPath(value);
+  if (!expanded) {
+    return undefined;
+  }
+  const cleaned = expanded.replace(/[\\/]+$/, "");
+  if (path.basename(cleaned) === ".copilot") {
+    return path.join(cleaned, "skills");
+  }
+  return cleaned;
+}
 
 async function readJsonFile(filePath: string): Promise<Partial<AppSettings>> {
   try {
@@ -36,16 +79,24 @@ export class SettingsStore {
       return this.cache;
     }
     const parsed = await readJsonFile(this.settingsPath);
-    this.cache = { ...DEFAULT_SETTINGS, ...parsed };
+    const merged = { ...DEFAULT_SETTINGS, ...parsed };
+    this.cache = {
+      ...merged,
+      vscodeCopilotRoot: normalizeCopilotRoot(merged.vscodeCopilotRoot)
+    };
     return this.cache;
   }
 
   async updateSettings(partial: Partial<AppSettings>): Promise<AppSettings> {
     const current = await this.getSettings();
     const next = { ...current, ...partial };
-    this.cache = next;
-    await writeJsonFile(this.settingsPath, next);
-    return next;
+    const normalized: AppSettings = {
+      ...next,
+      vscodeCopilotRoot: normalizeCopilotRoot(next.vscodeCopilotRoot)
+    };
+    this.cache = normalized;
+    await writeJsonFile(this.settingsPath, normalized);
+    return normalized;
   }
 
   getManagedRoot(targetId: string): string {

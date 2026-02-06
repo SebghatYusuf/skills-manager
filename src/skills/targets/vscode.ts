@@ -34,15 +34,26 @@ async function pathExists(candidate: string): Promise<boolean> {
   }
 }
 
-async function readSymlinkTarget(linkPath: string): Promise<string | null> {
+async function isDirectory(candidate: string): Promise<boolean> {
   try {
-    const stat = await fs.lstat(linkPath);
-    if (!stat.isSymbolicLink()) {
-      return null;
-    }
-    return await fs.readlink(linkPath);
+    const stat = await fs.stat(candidate);
+    return stat.isDirectory();
   } catch {
-    return null;
+    return false;
+  }
+}
+
+async function copyDir(source: string, destination: string): Promise<void> {
+  await fs.mkdir(destination, { recursive: true });
+  const entries = await fs.readdir(source, { withFileTypes: true });
+  for (const entry of entries) {
+    const srcPath = path.join(source, entry.name);
+    const destPath = path.join(destination, entry.name);
+    if (entry.isDirectory()) {
+      await copyDir(srcPath, destPath);
+    } else if (entry.isFile()) {
+      await fs.copyFile(srcPath, destPath);
+    }
   }
 }
 
@@ -64,8 +75,7 @@ export function createVsCodeTarget(options: { managedRoot: string; copilotRoot?:
       }
       if (options.copilotRoot) {
         const linkPath = path.join(options.copilotRoot, path.basename(skill.path));
-        const target = await readSymlinkTarget(linkPath);
-        return target ? "enabled" : "disabled";
+        return (await isDirectory(linkPath)) ? "enabled" : "disabled";
       }
       const disabledRoot = getDisabledRoot(root);
       if (isUnderRoot(skill.path, disabledRoot)) {
@@ -85,7 +95,14 @@ export function createVsCodeTarget(options: { managedRoot: string; copilotRoot?:
         if (enabled) {
           await ensureDir(options.copilotRoot);
           await fs.rm(linkPath, { recursive: true, force: true });
-          await fs.symlink(path.join(root, skillName), linkPath, "dir");
+          const sourcePath = path.join(root, skillName);
+          if (await isDirectory(sourcePath)) {
+            await copyDir(sourcePath, linkPath);
+          } else if (await isDirectory(skill.path)) {
+            await copyDir(skill.path, linkPath);
+          } else {
+            throw new Error("Skill source directory not found for VS Code enablement.");
+          }
         } else {
           await fs.rm(linkPath, { recursive: true, force: true });
         }

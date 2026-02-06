@@ -37,6 +37,38 @@ const stripGithubRepo = (repo?: string): string => {
   return repo.replace(/^https?:\/\/github\.com\//, "");
 };
 
+const ideMetaById: Record<
+  string,
+  { short: string; className: string; iconLight: string; iconDark?: string; alt: string }
+> = {
+  vscode: {
+    short: "VS",
+    className: "ide-vscode",
+    iconLight: "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/visual-studio-code.svg",
+    alt: "Visual Studio Code"
+  },
+  opencode: {
+    short: "OC",
+    className: "ide-opencode",
+    iconLight: "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/opencode-light.svg",
+    iconDark: "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/opencode-dark.svg",
+    alt: "OpenCode"
+  },
+  codex: {
+    short: "CX",
+    className: "ide-codex",
+    iconDark: "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/openai-light.svg",
+    iconLight: "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/openai.svg",
+    alt: "Codex"
+  },
+  claude: {
+    short: "CC",
+    className: "ide-claude",
+    iconLight: "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/claude-ai.svg",
+    alt: "Claude"
+  }
+};
+
 function summarizeTargets(skills: SkillEntry[], targets: TargetDescriptor[]) {
   return targets.map((target) => {
     const enabledSkills = skills.filter((skill) =>
@@ -184,6 +216,13 @@ export default function App() {
   }, [skills, skillQuery, skillFilter]);
 
   const isInstalledPopular = (skill: PopularSkill) => installedSkillNames.has(skill.name.toLowerCase());
+  const resolveIdeMeta = (targetId: string) =>
+    ideMetaById[targetId] ?? {
+      short: targetId.slice(0, 2).toUpperCase(),
+      className: "ide-generic",
+      iconLight: "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/code.svg",
+      alt: targetId
+    };
 
   const handleSelectPopular = (skill: PopularSkill) => {
     if (!skill.repo) {
@@ -620,6 +659,20 @@ export default function App() {
                       <div>
                         <p className="row-title">{skill.name}</p>
                         <p className="row-sub">{skill.description || "No description"}</p>
+                        <div className="ide-strip">
+                          {skill.targets.map((target) => {
+                            const meta = resolveIdeMeta(target.targetId);
+                            const iconSrc = theme === "dark" && meta.iconDark ? meta.iconDark : meta.iconLight;
+                            return (
+                              <span key={`${skill.id}-${target.targetId}`} className={`ide-pill ${target.status}`}>
+                                <span className={`ide-badge ${meta.className}`}>
+                                  <img className="ide-logo" src={iconSrc} alt={meta.alt} />
+                                </span>
+                                <span>{target.targetLabel}</span>
+                              </span>
+                            );
+                          })}
+                        </div>
                         <p className="row-path">{skill.path}</p>
                       </div>
                       <div className="row-actions">
@@ -733,28 +786,33 @@ export default function App() {
             <div className="modal-body">
               <p className="row-path">{activeSkill.path}</p>
               <div className="toggle-list">
-                {activeSkill.targets.map((target) => (
-                  <button
-                    key={`${activeSkill.id}-${target.targetId}`}
-                    className={`toggle-row ${target.status}`}
-                    disabled={busy || target.status === "unsupported"}
-                    onClick={() => handleToggle(activeSkill.id, target.targetId)}
-                  >
-                    <div>
-                      <span className="chip-title">{target.targetLabel}</span>
-                      <span className="chip-status">{targetStatusLabel[target.status]}</span>
+                {activeSkill.targets.map((target) => {
+                  const meta = resolveIdeMeta(target.targetId);
+                  const iconSrc = theme === "dark" && meta.iconDark ? meta.iconDark : meta.iconLight;
+                  const disabled = busy || target.status === "unsupported";
+                  return (
+                    <div key={`${activeSkill.id}-${target.targetId}`} className={`switch-row ${target.status}`}>
+                      <div className="switch-left">
+                        <span className={`ide-badge ${meta.className}`}>
+                          <img className="ide-logo" src={iconSrc} alt={meta.alt} />
+                        </span>
+                        <div>
+                          <span className="chip-title">{target.targetLabel}</span>
+                          <span className="chip-status">{targetStatusLabel[target.status]}</span>
+                        </div>
+                      </div>
+                      <label className="switch">
+                        <input
+                          type="checkbox"
+                          checked={target.status === "enabled"}
+                          disabled={disabled}
+                          onChange={() => handleToggle(activeSkill.id, target.targetId)}
+                        />
+                        <span className="slider" />
+                      </label>
                     </div>
-                    <span className="chip-action">
-                      {target.status === "enabled"
-                        ? "Disable"
-                        : target.status === "disabled"
-                          ? "Enable"
-                          : target.status === "not-installed"
-                            ? "Install"
-                            : ""}
-                    </span>
-                  </button>
-                ))}
+                  );
+                })}
               </div>
               <button className="danger" onClick={() => handleDeleteSkill(activeSkill)} disabled={busy}>
                 Delete From All IDEs
