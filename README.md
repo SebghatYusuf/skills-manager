@@ -21,6 +21,8 @@ Install, enable, and manage agent skills across IDEs with one unified desktop ap
 - VS Code (with optional Copilot skills root symlink)
 - OpenCode
 - Codex
+- Antigravity
+- Cursor
 - Claude Code
 
 > If an IDE target does not support enablement yet, the toggle will show it as `Unsupported`.

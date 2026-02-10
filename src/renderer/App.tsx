@@ -11,7 +11,8 @@ import type {
   SkillsMpSearchResult,
   SkillEntry,
   TargetDescriptor,
-  TargetState
+  TargetState,
+  UpdateStatus
 } from "@shared/types";
 
 const emptySettings: AppSettings = {
@@ -60,6 +61,18 @@ const ideMetaById: Record<
     iconDark: "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/openai-light.svg",
     iconLight: "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/openai.svg",
     alt: "Codex"
+  },
+  antigravity: {
+    short: "AG",
+    className: "ide-antigravity",
+    iconLight: "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/atom.svg",
+    alt: "Antigravity"
+  },
+  cursor: {
+    short: "CU",
+    className: "ide-cursor",
+    iconLight: "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/cursor.svg",
+    alt: "Cursor"
   },
   claude: {
     short: "CC",
@@ -110,6 +123,7 @@ export default function App() {
   const [skillFilter, setSkillFilter] = useState<"all" | "enabled" | "disabled" | "not-installed">("all");
   const [ideFilter, setIdeFilter] = useState<string>("all");
   const [ideStatusFilter, setIdeStatusFilter] = useState<"any" | "enabled" | "disabled" | "not-installed">("any");
+  const [updateStatus, setUpdateStatus] = useState<UpdateStatus>({ status: "idle" });
 
   useEffect(() => {
     const saved = window.localStorage.getItem("theme");
@@ -119,6 +133,12 @@ export default function App() {
     }
     const prefersDark = window.matchMedia?.("(prefers-color-scheme: dark)").matches;
     setTheme(prefersDark ? "dark" : "light");
+  }, []);
+
+  useEffect(() => {
+    window.skillsApi.getUpdateStatus().then(setUpdateStatus);
+    const unsubscribe = window.skillsApi.onUpdateStatus((status) => setUpdateStatus(status));
+    return () => unsubscribe();
   }, []);
 
   useEffect(() => {
@@ -189,6 +209,29 @@ export default function App() {
   }, []);
 
   const targetSummaries = useMemo(() => summarizeTargets(skills, targets), [skills, targets]);
+
+  const updateSummary = useMemo(() => {
+    switch (updateStatus.status) {
+      case "checking":
+        return "Checking for updates…";
+      case "available":
+        return `Update ${updateStatus.releaseName ?? updateStatus.version ?? "available"} is ready to download.`;
+      case "downloading":
+        return `Downloading update… ${updateStatus.progress ?? 0}%`;
+      case "downloaded":
+        return `Update ${updateStatus.releaseName ?? updateStatus.version ?? ""} is ready to install.`;
+      case "not-available":
+        return "You're on the latest version.";
+      case "error":
+        return updateStatus.message ?? "Update error.";
+      default:
+        return "Keep your app up to date with the latest releases.";
+    }
+  }, [updateStatus]);
+
+  const canCheckUpdates = updateStatus.status !== "checking" && updateStatus.status !== "downloading";
+  const canDownloadUpdate = updateStatus.status === "available";
+  const canInstallUpdate = updateStatus.status === "downloaded";
   const popularBySource = useMemo(() => {
     return {
       "skills.sh": popularSkills.skills.filter((skill) => skill.source === "skills.sh").slice(0, 5),
@@ -328,6 +371,18 @@ export default function App() {
     if (Object.prototype.hasOwnProperty.call(partial, "skillsmpApiKey")) {
       await loadPopular();
     }
+  };
+
+  const handleCheckUpdates = async () => {
+    await window.skillsApi.checkForUpdates();
+  };
+
+  const handleDownloadUpdate = async () => {
+    await window.skillsApi.downloadUpdate();
+  };
+
+  const handleInstallUpdate = async () => {
+    await window.skillsApi.installUpdate();
   };
 
   const handleDeleteSkill = async (skill: SkillEntry) => {
@@ -821,6 +876,36 @@ export default function App() {
 
           {activeTab === "settings" && (
             <section className="stack">
+              <div className="panel">
+                <div className="panel-header">
+                  <div>
+                    <h2>App Updates</h2>
+                    <p>Download the latest release from GitHub</p>
+                  </div>
+                </div>
+                <div className="update-card">
+                  <p className="muted">{updateSummary}</p>
+                  {updateStatus.status === "downloading" && (
+                    <div className="update-progress" aria-label="Update download progress">
+                      <div
+                        className="update-progress-bar"
+                        style={{ width: `${updateStatus.progress ?? 0}%` }}
+                      />
+                    </div>
+                  )}
+                  <div className="update-actions">
+                    <button className="ghost" onClick={handleCheckUpdates} disabled={!canCheckUpdates}>
+                      Check for Updates
+                    </button>
+                    <button className="primary compact" onClick={handleDownloadUpdate} disabled={!canDownloadUpdate}>
+                      Download Update
+                    </button>
+                    <button className="primary compact" onClick={handleInstallUpdate} disabled={!canInstallUpdate}>
+                      Install & Restart
+                    </button>
+                  </div>
+                </div>
+              </div>
               <div className="panel">
                 <div className="panel-header">
                   <div>

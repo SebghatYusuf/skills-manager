@@ -9,7 +9,8 @@ import {
   PopularSkillsResult,
   SkillsMpSearchResult,
   SkillEntry,
-  TargetDescriptor
+  TargetDescriptor,
+  UpdateStatus
 } from "../shared/types";
 
 const api = {
@@ -42,6 +43,19 @@ const api = {
   getSettings: (): Promise<AppSettings> => ipcRenderer.invoke("settings:get"),
   updateSettings: (partial: Partial<AppSettings>): Promise<AppSettings> =>
     ipcRenderer.invoke("settings:update", partial),
+  getUpdateStatus: (): Promise<UpdateStatus> => ipcRenderer.invoke("update:status"),
+  checkForUpdates: (): Promise<UpdateStatus> => ipcRenderer.invoke("update:check"),
+  downloadUpdate: (): Promise<UpdateStatus> => ipcRenderer.invoke("update:download"),
+  installUpdate: (): Promise<boolean> => ipcRenderer.invoke("update:install"),
+  onUpdateStatus: (handler: (status: UpdateStatus) => void): (() => void) => {
+    const listener = (_event: Electron.IpcRendererEvent, status: UpdateStatus) => {
+      handler(status);
+    };
+    ipcRenderer.on("update:status", listener);
+    return () => {
+      ipcRenderer.removeListener("update:status", listener);
+    };
+  },
   onAppNavigate: (handler: (tab: "discover" | "catalog" | "activity" | "settings") => void): (() => void) => {
     const listener = (_event: Electron.IpcRendererEvent, tab: "discover" | "catalog" | "activity" | "settings") => {
       handler(tab);

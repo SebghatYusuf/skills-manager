@@ -1,6 +1,7 @@
 import { ipcMain } from "electron";
 import { DebugLogEntry, InstallProgress, InstallRequest } from "../shared/types";
 import { SkillsService } from "./skillsService";
+import { checkForUpdates, downloadUpdate, getUpdateStatus, installUpdate } from "./updater";
 
 export function registerIpcHandlers(service: SkillsService): void {
   ipcMain.handle("skills:list", async () => service.listSkills());
@@ -24,4 +25,11 @@ export function registerIpcHandlers(service: SkillsService): void {
   ipcMain.handle("skills:delete", async (_event, skillId: string) => service.deleteSkillAll(skillId));
   ipcMain.handle("settings:get", async () => service.getSettings());
   ipcMain.handle("settings:update", async (_event, partial: Record<string, unknown>) => service.updateSettings(partial));
+  ipcMain.handle("update:status", async () => getUpdateStatus());
+  ipcMain.handle("update:check", async () => checkForUpdates());
+  ipcMain.handle("update:download", async () => downloadUpdate());
+  ipcMain.handle("update:install", async () => {
+    installUpdate();
+    return true;
+  });
 }

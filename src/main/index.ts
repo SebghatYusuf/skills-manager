@@ -5,6 +5,7 @@ import { fileURLToPath } from "url";
 import { SettingsStore } from "./settingsStore";
 import { SkillsService } from "./skillsService";
 import { registerIpcHandlers } from "./ipc";
+import { registerAutoUpdater } from "./updater";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -160,6 +161,7 @@ app.whenReady().then(() => {
   const settingsStore = new SettingsStore();
   const service = new SkillsService(settingsStore, []);
   registerIpcHandlers(service);
+  registerAutoUpdater();
 
   createWindow();
 

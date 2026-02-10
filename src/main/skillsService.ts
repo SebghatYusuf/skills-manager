@@ -17,8 +17,10 @@ import {
 } from "../shared/types";
 import { parseSkillFile } from "../skills/parser";
 import { SkillRegistry } from "../skills/registry";
+import { createAntigravityTarget } from "../skills/targets/antigravity";
 import { createClaudeTarget } from "../skills/targets/claude";
 import { createCodexTarget } from "../skills/targets/codex";
+import { createCursorTarget } from "../skills/targets/cursor";
 import { createOpencodeTarget } from "../skills/targets/opencode";
 import { createVsCodeTarget } from "../skills/targets/vscode";
 import { SettingsStore } from "./settingsStore";
@@ -312,6 +314,8 @@ export class SkillsService {
       }),
       createOpencodeTarget({ workspaceFolders: this.workspaceFolders }),
       createCodexTarget({ workspaceFolders: this.workspaceFolders }),
+      createAntigravityTarget(),
+      createCursorTarget(),
       createClaudeTarget({ workspaceFolders: this.workspaceFolders })
     ];
   }

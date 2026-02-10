@@ -88,6 +88,23 @@ export interface DebugLogEntry {
   timestamp: string;
 }
 
+export type UpdateStage =
+  | "idle"
+  | "checking"
+  | "available"
+  | "not-available"
+  | "downloading"
+  | "downloaded"
+  | "error";
+
+export interface UpdateStatus {
+  status: UpdateStage;
+  message?: string;
+  version?: string;
+  releaseName?: string;
+  progress?: number;
+}
+
 export interface AppSettings {
   skillsmpApiKey?: string;
   extraRoots: string[];
