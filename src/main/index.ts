@@ -110,7 +110,10 @@ function buildAppMenu(mainWindow: BrowserWindow): void {
 }
 
 function resolveIconPath(): string {
-  return path.join(app.getAppPath(), "media/app-icon.svg");
+  if (process.platform === "darwin") {
+    return path.join(app.getAppPath(), "media/app-icon.svg");
+  }
+  return path.join(app.getAppPath(), "build/icon.png");
 }
 
 async function createWindow(): Promise<BrowserWindow> {

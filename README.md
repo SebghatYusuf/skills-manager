@@ -77,6 +77,14 @@ yarn dist:mac
 
 Artifacts land in `dist/`.
 
+## Building for Windows
+```bash
+yarn build
+yarn dist:win
+```
+
+Windows artifacts land in `dist/`.
+
 ## Troubleshooting
 ### SkillsMP search returns no results
 - Check `SKILLSMP_API_KEY` is set in `.env`.
@@ -105,6 +113,8 @@ src/
 yarn dev         # run in development
 yarn build       # build production bundles
 yarn dist:mac    # build macOS installer
+yarn dist:win    # build Windows installer + zip
+yarn dist:all    # build macOS + Windows artifacts
 yarn icon:mac    # generate macOS icns
 ```
 
